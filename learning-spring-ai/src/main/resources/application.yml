@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: spring-ai-gemma
+  reactor:
+    context-propagation: auto
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY:dummy-key-for-local}
+      base-url: ${GEMMA_BASE_URL:http://localhost:12434/engines/v1}
+      chat:
+        options:
+          model: ${GEMMA_MODEL:docker.io/ai/gemma3:4B}
+    chat:
+      observations:
+        include-prompt: true
+        include-completion: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "beans,health,info"
+  tracing:
+    sampling:
+      probability: 1.0
+  otlp:
+    tracing:
+      export:
+        enabled: true
+      endpoint: http://localhost:3000/api/public/otel/v1/traces
+      transport: http
+      headers:
+        Authorization: "Basic cGstbGYtYTE2N2FlNDQtMmE1MC00YzRiLTgzQtZDg4MjE3YjE4NDhhOnNrLWxmLTQ0YjkzODA0LWMzMzUtNGVjMi05ZjA1LWZmODIyYzdiNjJlOQ=="
+
+logging:
+  level:
+    io.micrometer.observation.contextpropagation.ObservationThreadLocalAccessor: ERROR
+    io.opentelemetry.exporter: DEBUG
+    org.springframework.ai: DEBUG
