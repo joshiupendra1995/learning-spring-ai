@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring AI & Gemma Assistant</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Marked.js for Markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Highlight.js for code syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+    <style>
+        /* Markdown Custom Styles */
+        .prose {
+            line-height: 1.6;
+        }
+        .prose pre {
+            background-color: #0f172a !important;
+            border: 1px solid #334155;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 0.75rem;
+            margin-bottom: 0.75rem;
+            overflow-x: auto;
+        }
+        .prose code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.875rem;
+        }
+        .prose :not(pre) > code {
+            background-color: #1e293b;
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.25rem;
+            color: #38bdf8;
+        }
+        .prose p { margin-bottom: 0.75rem; }
+        .prose ul { list-style-type: disc; padding-left: 1.25rem; margin-bottom: 0.75rem; }
+        .prose ol { list-style-type: decimal; padding-left: 1.25rem; margin-bottom: 0.75rem; }
+        .prose h1, .prose h2, .prose h3 { font-weight: 700; color: #f8fafc; margin-top: 1rem; margin-bottom: 0.5rem; }
+        .prose h1 { font-size: 1.5rem; }
+        .prose h2 { font-size: 1.25rem; }
+        .prose h3 { font-size: 1.125rem; }
+        .prose hr { border-color: #334155; margin: 1rem 0; }
+        .prose strong { color: #f8fafc; font-weight: 600; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 flex flex-col h-screen font-sans">
+
+<!-- Header -->
+<header class="py-4 border-b border-slate-800 bg-slate-950 text-center shadow">
+    <h1 class="text-xl font-bold text-indigo-400">Spring AI — Assistant</h1>
+</header>
+
+<!-- Chat Window -->
+<main id="chatWindow" class="flex-1 overflow-y-auto p-4 space-y-4 max-w-4xl mx-auto w-full">
+    <div class="bg-slate-800/60 border border-slate-700 rounded-lg p-4 max-w-[90%] self-start">
+        <span class="text-xs font-semibold text-indigo-400 block mb-1">Gemma</span>
+        <div class="prose text-slate-300">Hello! Ask me anything</div>
+    </div>
+</main>
+
+<!-- Taller Input Section -->
+<footer class="border-t border-slate-800 bg-slate-950 p-4">
+    <form id="chatForm" class="max-w-4xl mx-auto flex gap-3 items-end">
+            <textarea
+                    id="messageInput"
+                    rows="3"
+                    placeholder="Ask Me Anything... (Shift + Enter for new line)"
+                    class="flex-1 bg-slate-800 border border-slate-700 rounded-lg p-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none min-h-[80px]"
+                    required
+            ></textarea>
+        <button
+                type="submit"
+                id="sendBtn"
+                class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-6 py-3 rounded-lg transition disabled:opacity-50 h-[80px]"
+        >
+            Send
+        </button>
+    </form>
+</footer>
+
+<script>
+    const chatWindow = document.getElementById('chatWindow');
+    const chatForm = document.getElementById('chatForm');
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+
+    marked.setOptions({
+        breaks: false,
+        gfm: true
+    });
+
+    function appendMessage(sender, rawText, isUser = false) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `p-4 rounded-lg max-w-[90%] ${
+            isUser
+                ? 'bg-indigo-600 text-white self-end ml-auto'
+                : 'bg-slate-800/60 border border-slate-700 text-slate-200 self-start mr-auto'
+        }`;
+
+        const header = document.createElement('span');
+        header.className = `text-xs font-semibold block mb-2 ${isUser ? 'text-indigo-200' : 'text-indigo-400'}`;
+        header.textContent = sender;
+
+        const contentDiv = document.createElement('div');
+        contentDiv.className = isUser ? 'whitespace-pre-wrap' : 'prose text-slate-200';
+
+        if (isUser) {
+            contentDiv.textContent = rawText;
+        } else {
+            contentDiv.innerHTML = marked.parse(rawText);
+        }
+
+        messageDiv.appendChild(header);
+        messageDiv.appendChild(contentDiv);
+        chatWindow.appendChild(messageDiv);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+
+        return contentDiv;
+    }
+
+    messageInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            chatForm.requestSubmit();
+        }
+    });
+
+    chatForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const message = messageInput.value.trim();
+        if (!message) return;
+
+        appendMessage('You', message, true);
+        messageInput.value = '';
+        messageInput.disabled = true;
+        sendBtn.disabled = true;
+
+        const botContentElement = appendMessage('Gemma', '');
+        let accumulatedMarkdown = '';
+        let rawBuffer = '';
+
+        try {
+            const response = await fetch('/api/ai/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'text/event-stream, text/plain, */*'
+                },
+                body: JSON.stringify({ message: message })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP Error: ${response.status}`);
+            }
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder('utf-8');
+
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+
+                rawBuffer += decoder.decode(value, { stream: true });
+                const lines = rawBuffer.split('\n');
+                rawBuffer = lines.pop() || '';
+
+                for (let line of lines) {
+                    if (line.startsWith('data:')) {
+                        accumulatedMarkdown += line.slice(5);
+                    } else if (line.startsWith(':')) {
+                        continue;
+                    } else if (line.length > 0) {
+                        accumulatedMarkdown += line;
+                    }
+                }
+
+                botContentElement.innerHTML = marked.parse(accumulatedMarkdown);
+
+                botContentElement.querySelectorAll('pre code').forEach((block) => {
+                    hljs.highlightElement(block);
+                });
+
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+            }
+
+            if (rawBuffer) {
+                if (rawBuffer.startsWith('data:')) {
+                    accumulatedMarkdown += rawBuffer.slice(5);
+                } else if (!rawBuffer.startsWith(':')) {
+                    accumulatedMarkdown += rawBuffer;
+                }
+                botContentElement.innerHTML = marked.parse(accumulatedMarkdown);
+                botContentElement.querySelectorAll('pre code').forEach((block) => {
+                    hljs.highlightElement(block);
+                });
+            }
+
+        } catch (err) {
+            botContentElement.innerHTML = `<p class="text-red-400">Error: ${err.message}</p>`;
+            console.error(err);
+        } finally {
+            messageInput.disabled = false;
+            sendBtn.disabled = false;
+            messageInput.focus();
+        }
+    });
+</script>
+</body>
+</html>
