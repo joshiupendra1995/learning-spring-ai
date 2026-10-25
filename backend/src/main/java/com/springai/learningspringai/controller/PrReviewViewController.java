@@ -8,6 +8,6 @@ public class PrReviewViewController {
 
     @GetMapping("/pr-review")
     public String prReviewPage() {
-        return "pr-review";
+        return "forward:/index.html";
     }
 }

@@ -1,0 +1,315 @@
+@import 'highlight.js/styles/github-dark.css';
+
+:root {
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #f1f5f9;
+  background: #0f172a;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+a {
+  color: #94a3b8;
+  font-size: 0.875rem;
+  text-decoration: none;
+  transition: color 150ms ease;
+}
+
+a:hover {
+  color: #818cf8;
+}
+
+.app-shell {
+  display: flex;
+  height: 100vh;
+  min-height: 420px;
+  flex-direction: column;
+}
+
+.site-header {
+  display: flex;
+  min-height: 65px;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #1e293b;
+  background: #020617;
+  padding: 1rem 1.5rem;
+  box-shadow: 0 1px 3px #0003;
+}
+
+.site-header h1 {
+  margin: 0;
+  color: #818cf8;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.centered-header {
+  justify-content: center;
+  position: relative;
+}
+
+.centered-header a {
+  position: absolute;
+  right: 1.5rem;
+}
+
+.message-list {
+  display: flex;
+  width: min(100%, 896px);
+  flex: 1;
+  flex-direction: column;
+  gap: 1rem;
+  overflow-y: auto;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.message {
+  max-width: 90%;
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.assistant-message {
+  align-self: flex-start;
+  border: 1px solid #334155;
+  background: rgb(30 41 59 / 60%);
+  color: #e2e8f0;
+}
+
+.user-message {
+  align-self: flex-end;
+  margin-left: auto;
+  background: #4f46e5;
+  color: white;
+}
+
+.message-sender {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #818cf8;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.user-message .message-sender {
+  color: #c7d2fe;
+}
+
+.plain-content {
+  white-space: pre-wrap;
+}
+
+.input-footer,
+.review-input {
+  border-top: 1px solid #1e293b;
+  background: #020617;
+  padding: 1rem;
+}
+
+.review-input {
+  border-top: 0;
+  border-bottom: 1px solid #1e293b;
+}
+
+.input-form {
+  display: flex;
+  width: min(100%, 896px);
+  align-items: flex-end;
+  gap: 0.75rem;
+  margin: 0 auto;
+}
+
+.input-form textarea,
+.input-form input {
+  min-width: 0;
+  flex: 1;
+  border: 1px solid #334155;
+  border-radius: 0.5rem;
+  outline: none;
+  background: #1e293b;
+  padding: 0.75rem;
+  color: #f1f5f9;
+}
+
+.input-form textarea {
+  min-height: 80px;
+  resize: none;
+}
+
+.input-form input {
+  height: 48px;
+}
+
+.input-form textarea::placeholder,
+.input-form input::placeholder {
+  color: #64748b;
+}
+
+.input-form textarea:focus,
+.input-form input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgb(99 102 241 / 35%);
+}
+
+.input-form button {
+  min-height: 48px;
+  border: 0;
+  border-radius: 0.5rem;
+  background: #4f46e5;
+  padding: 0.75rem 1.5rem;
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.input-form:not(.review-form) button {
+  min-height: 80px;
+}
+
+.input-form button:hover:not(:disabled) {
+  background: #6366f1;
+}
+
+.input-form button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.review-messages .message {
+  width: 100%;
+}
+
+.review-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.prose {
+  line-height: 1.6;
+}
+
+.prose pre {
+  overflow-x: auto;
+  margin: 0.75rem 0;
+  border: 1px solid #334155;
+  border-radius: 0.5rem;
+  background: #0f172a !important;
+  padding: 1rem;
+}
+
+.prose code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.875rem;
+}
+
+.prose :not(pre) > code {
+  border-radius: 0.25rem;
+  background: #1e293b;
+  padding: 0.2rem 0.4rem;
+  color: #38bdf8;
+}
+
+.prose p {
+  margin: 0 0 0.75rem;
+}
+
+.prose p:last-child {
+  margin-bottom: 0;
+}
+
+.prose ul,
+.prose ol {
+  margin: 0 0 0.75rem;
+  padding-left: 1.25rem;
+}
+
+.prose ul {
+  list-style: disc;
+}
+
+.prose ol {
+  list-style: decimal;
+}
+
+.prose h1,
+.prose h2,
+.prose h3 {
+  margin: 1rem 0 0.5rem;
+  color: #f8fafc;
+  font-weight: 700;
+}
+
+.prose h1 {
+  font-size: 1.5rem;
+}
+
+.prose h2 {
+  font-size: 1.25rem;
+}
+
+.prose h3 {
+  font-size: 1.125rem;
+}
+
+.prose hr {
+  margin: 1rem 0;
+  border-color: #334155;
+}
+
+.prose strong {
+  color: #f8fafc;
+  font-weight: 600;
+}
+
+.error-message {
+  margin: 0;
+  color: #f87171;
+}
+
+@media (max-width: 640px) {
+  .site-header {
+    gap: 0.75rem;
+    padding: 1rem;
+  }
+
+  .site-header h1 {
+    font-size: 1rem;
+  }
+
+  .centered-header a {
+    position: static;
+  }
+
+  .input-form {
+    align-items: stretch;
+  }
+
+  .input-form button {
+    padding-right: 1rem;
+    padding-left: 1rem;
+  }
+
+  .input-form:not(.review-form) button {
+    min-height: 80px;
+  }
+}
