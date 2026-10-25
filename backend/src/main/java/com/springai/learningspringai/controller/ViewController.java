@@ -8,6 +8,6 @@ public class ViewController {
 
     @GetMapping("/")
     public String index() {
-        return "chat";
+        return "forward:/index.html";
     }
 }
