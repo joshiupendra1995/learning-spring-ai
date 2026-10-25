@@ -10,12 +10,14 @@ export default function ChatPage() {
   const [messages, setMessages] = useState(initialMessages);
   const [message, setMessage] = useState('');
   const { error, isLoading, streamResponse } = useEventStream();
-  const endOfMessagesRef = useRef(null);
+  const messageListRef = useRef(null);
   const inputRef = useRef(null);
+  const shouldAutoScrollRef = useRef(true);
 
   useEffect(() => {
-    endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, error]);
+    const list = messageListRef.current;
+    if (list && shouldAutoScrollRef.current) list.scrollTop = list.scrollHeight;
+  }, [messages, error, isLoading]);
 
   useEffect(() => {
     if (!isLoading) inputRef.current?.focus();
@@ -56,19 +58,29 @@ export default function ChatPage() {
         <h1>Spring AI — Assistant</h1>
         <a href="/pr-review">PR Code Review</a>
       </header>
-      <main className="message-list">
+      <main
+        className="message-list"
+        ref={messageListRef}
+        onScroll={(event) => {
+          const list = event.currentTarget;
+          shouldAutoScrollRef.current =
+            list.scrollHeight - list.scrollTop - list.clientHeight < 160;
+        }}
+      >
         {messages.map((item) => (
           <article className={`message ${item.isUser ? 'user-message' : 'assistant-message'}`} key={item.id}>
             <span className="message-sender">{item.sender}</span>
             {item.isUser ? (
               <div className="plain-content">{item.content}</div>
             ) : (
-              <MarkdownMessage content={item.content} />
+              <MarkdownMessage
+                content={item.content}
+                streaming={isLoading && item.id === messages.at(-1)?.id}
+              />
             )}
           </article>
         ))}
         {error && <p className="error-message">Error: {error}</p>}
-        <div ref={endOfMessagesRef} />
       </main>
       <footer className="input-footer">
         <form className="input-form" onSubmit={submitMessage}>

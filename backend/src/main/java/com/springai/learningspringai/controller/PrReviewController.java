@@ -56,6 +56,11 @@ public class PrReviewController {
                 3. **Performance & Architecture**: Scalability, resource usage, or design patterns impact.
                 4. **Security & Best Practices**: Vulnerabilities, clean coding guidelines, error handling.
                 5. **Actionable Recommendations**: Specific code improvements or refactoring suggestions.
+                Write each actionable finding as a level-three heading in this exact format:
+                `### [SEVERITY] Short finding title`
+                Use CRITICAL, HIGH, MEDIUM, or LOW for severity. Follow each finding with
+                evidence and a concrete recommendation. Do not use level-three headings for
+                category names or non-actionable content.
                 """;
 
         return webClient.get()

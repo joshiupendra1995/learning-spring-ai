@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { memo, useEffect, useMemo, useRef } from 'react';
 import DOMPurify from 'dompurify';
 import hljs from 'highlight.js/lib/common';
 import { marked } from 'marked';
 
 marked.setOptions({ breaks: false, gfm: true });
 
-export default function MarkdownMessage({ content }) {
+function MarkdownMessage({ content, streaming = false }) {
   const contentRef = useRef(null);
   const sanitizedHtml = useMemo(
     () => DOMPurify.sanitize(marked.parse(content)),
@@ -13,10 +13,13 @@ export default function MarkdownMessage({ content }) {
   );
 
   useEffect(() => {
+    if (streaming) return;
     contentRef.current?.querySelectorAll('pre code').forEach((block) => {
-      hljs.highlightElement(block);
+      if (!block.classList.contains('hljs')) {
+        hljs.highlightElement(block);
+      }
     });
-  }, [sanitizedHtml]);
+  }, [sanitizedHtml, streaming]);
 
   return (
     <div
@@ -26,3 +29,5 @@ export default function MarkdownMessage({ content }) {
     />
   );
 }
+
+export default memo(MarkdownMessage);

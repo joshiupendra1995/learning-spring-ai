@@ -15,6 +15,15 @@ spring:
         include-prompt: true
         include-completion: true
 
+server:
+  address: ${SERVER_ADDRESS:127.0.0.1}
+
+app:
+  github:
+    token: ${GITHUB_TOKEN:}
+    write:
+      enabled: ${GITHUB_WRITE_ENABLED:true}
+
 management:
   endpoints:
     web:
@@ -30,7 +39,7 @@ management:
       endpoint: http://localhost:3000/api/public/otel/v1/traces
       transport: http
       headers:
-        Authorization: "Basic cGstbGYtYTE2N2FlNDQtMmE1MC00YzRiLTgzQtZDg4MjE3YjE4NDhhOnNrLWxmLTQ0YjkzODA0LWMzMzUtNGVjMi05ZjA1LWZmODIyYzdiNjJlOQ=="
+        Authorization: ""
 
 logging:
   level:

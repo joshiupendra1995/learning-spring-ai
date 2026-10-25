@@ -8,6 +8,23 @@ export function useEventStream() {
     setIsLoading(true);
     setError('');
 
+    let pendingChunks = '';
+    let animationFrameId = null;
+    const flushChunks = () => {
+      animationFrameId = null;
+      if (pendingChunks) {
+        const chunks = pendingChunks;
+        pendingChunks = '';
+        onChunk(chunks);
+      }
+    };
+    const queueChunk = (chunk) => {
+      pendingChunks += chunk;
+      if (animationFrameId === null) {
+        animationFrameId = requestAnimationFrame(flushChunks);
+      }
+    };
+
     try {
       const response = await fetch(url, {
         method: 'POST',
@@ -36,7 +53,7 @@ export function useEventStream() {
           .filter((line) => line.startsWith('data:'))
           .map((line) => line.slice(5))
           .join('\n');
-        if (data) onChunk(data);
+        if (data) queueChunk(data);
       }
 
       while (true) {
@@ -52,6 +69,8 @@ export function useEventStream() {
     } catch (streamError) {
       setError(streamError instanceof Error ? streamError.message : String(streamError));
     } finally {
+      if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
+      flushChunks();
       setIsLoading(false);
     }
   }
