@@ -23,13 +23,17 @@ public class TestSummaryController {
             return Mono.just("Error: Input text cannot be empty.");
         }
 
-        // Note: Using blocking .call() inside a reactive endpoint blocks the event loop thread.
-        // Let's see if the AI Reviewer catches this architectural flaw!
-        String summary = chatClient.prompt()
-                .user("Provide a concise 2-sentence summary of the following text: " + text)
-                .call()
-                .content();
-
-        return Mono.just(summary);
+        // Using blocking .call() inside a reactive endpoint blocks the event loop thread.
+        //Await the completion of the chat client call in a separate thread, to prevent blocking the event loop.
+        return Mono.create(sink -> {
+            chatClient prompt()
+                    .user("Provide a concise 2-sentence summary of the following text: " + text)
+                    .call()
+                    .content()
+                .subscribe(
+                    summary -> sink.success(summary),
+                    error -> sink.error(error)
+                );
+        });
     }
 }
